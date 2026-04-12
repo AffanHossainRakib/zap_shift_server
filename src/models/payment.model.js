@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
-const { getParcelsCollection } = require("../config/db");
+const { getParcelsCollection, getPaymentCollection } = require("../config/db");
 
-const markParcelAsPaidById = async (parcelId) => {
+const markParcelAsPaidById = async (parcelId, trackingId) => {
   const collection = await getParcelsCollection();
 
   return collection.updateOne(
@@ -9,11 +9,18 @@ const markParcelAsPaidById = async (parcelId) => {
     {
       $set: {
         paymentStatus: "paid",
+        trackingId: trackingId,
       },
     },
   );
 };
 
+const createPaymentRecord = async (payment) => {
+  const collection = await getPaymentCollection();
+  return collection.insertOne(payment);
+};
+
 module.exports = {
   markParcelAsPaidById,
+  createPaymentRecord,
 };

@@ -1,6 +1,10 @@
 const stripe = require("../config/stripe");
 const { ObjectId } = require("mongodb");
-const { markParcelAsPaidById } = require("../models/payment.model");
+const {
+  markParcelAsPaidById,
+  createPaymentRecord,
+} = require("../models/payment.model");
+const { generateTrackingId } = require("../utils/trackingId");
 
 const createCheckoutSession = async (req, res) => {
   try {
@@ -36,6 +40,7 @@ const createCheckoutSession = async (req, res) => {
       mode: "payment",
       metadata: {
         parcelId: paymentInfo.parcelId,
+        parcelName: paymentInfo.parcelName,
       },
       success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancelled`,
@@ -69,14 +74,25 @@ const handlePaymentSuccess = async (req, res) => {
         .status(400)
         .send({ error: "Invalid parcel id in session metadata" });
     }
+    const trackingId = generateTrackingId();
+    const result = await markParcelAsPaidById(parcelId, trackingId);
 
-    const result = await markParcelAsPaidById(parcelId);
+    const payment = {
+      amount: session.amount_total / 100,
+      currency: session.currency,
+      customerEmail: session.customer_email,
+      parcelId: session.metadata?.parcelId,
+      parcelName: session.metadata?.parcelName,
+      trackingId: trackingId,
+      transactionId: session.payment_intent,
+      paymentStatus: session.payment_status,
 
-    console.log(
-      `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
-    );
+      createdAt: new Date(),
+    };
 
-    res.send({ success: true });
+    const resultPayment = await createPaymentRecord(payment);
+
+    res.send({ success: true, trackingId: trackingId, paymentId: resultPayment.insertedId });
   } catch (error) {
     console.error("Error handling payment success:", error);
     res.status(500).send({ error: "Failed to process payment success" });

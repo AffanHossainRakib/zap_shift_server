@@ -33,7 +33,7 @@ const initCollections = async () => {
     await client.connect();
     const db = client.db("zap_shift_db");
     parcelsCollection = db.collection("parcels");
-    paymentCollection = db.collection("payment");
+    paymentCollection = db.collection("payments");
     dbConnected = true;
   })();
 
