@@ -20,7 +20,25 @@ const createPaymentRecord = async (payment) => {
   return collection.insertOne(payment);
 };
 
+const getPaymentByTransactionId = async (transactionId) => {
+  const collection = await getPaymentCollection();
+  return await collection.findOne({ transactionId: transactionId });
+};
+
+const getPaymentsByCustomerEmail = async (email) => {
+  const query = {};
+  if (email) {
+    query.customerEmail = email;
+  }
+  const collection = await getPaymentCollection();
+  const cursor = collection.find(query);
+  const result = await cursor.toArray();
+  return result;
+};
+
 module.exports = {
   markParcelAsPaidById,
   createPaymentRecord,
+  getPaymentByTransactionId,
+  getPaymentsByCustomerEmail,
 };

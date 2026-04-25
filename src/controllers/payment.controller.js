@@ -3,6 +3,8 @@ const { ObjectId } = require("mongodb");
 const {
   markParcelAsPaidById,
   createPaymentRecord,
+  getPaymentByTransactionId,
+  getPaymentsByCustomerEmail,
 } = require("../models/payment.model");
 const { generateTrackingId } = require("../utils/trackingId");
 
@@ -67,6 +69,18 @@ const handlePaymentSuccess = async (req, res) => {
       return res.send({ success: false });
     }
 
+    const transactionId = session.payment_intent;
+    const paymentInfo = await getPaymentByTransactionId(transactionId);
+
+    if (paymentInfo?.paymentStatus === "paid") {
+      return res.send({
+        success: true,
+        message: "Payment already processed",
+        trackingId: paymentInfo.trackingId,
+        paymentId: paymentInfo._id,
+      });
+    }
+
     const parcelId = session.metadata?.parcelId;
 
     if (!parcelId || !ObjectId.isValid(parcelId)) {
@@ -92,14 +106,32 @@ const handlePaymentSuccess = async (req, res) => {
 
     const resultPayment = await createPaymentRecord(payment);
 
-    res.send({ success: true, trackingId: trackingId, paymentId: resultPayment.insertedId });
+    res.send({
+      success: true,
+      trackingId: trackingId,
+      paymentId: resultPayment.insertedId,
+    });
   } catch (error) {
     console.error("Error handling payment success:", error);
     res.status(500).send({ error: "Failed to process payment success" });
   }
 };
 
+const getAllPayments = async (req, res) => {
+  try {
+    const email = req?.query?.email;
+
+    const payments = await getPaymentsByCustomerEmail(email);
+
+    res.send({ success: true, payments });
+  } catch (error) {
+    console.error("Error fetching payments:", error);
+    res.status(500).send({ error: "Failed to fetch payments" });
+  }
+};
+
 module.exports = {
   createCheckoutSession,
   handlePaymentSuccess,
+  getAllPayments,
 };
