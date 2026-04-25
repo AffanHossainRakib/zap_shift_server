@@ -5,12 +5,13 @@ const {
   addParcel,
   removeParcel,
 } = require("../controllers/parcel.controller");
+const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
 
 const router = express.Router();
 
-router.get("/", getParcels);
-router.get("/:id", getParcelById);
-router.post("/", addParcel);
-router.delete("/:id", removeParcel);
+router.get("/", verifyFirebaseToken, getParcels);
+router.get("/:id", verifyFirebaseToken, getParcelById);
+router.post("/", verifyFirebaseToken, addParcel);
+router.delete("/:id", verifyFirebaseToken, removeParcel);
 
 module.exports = router;

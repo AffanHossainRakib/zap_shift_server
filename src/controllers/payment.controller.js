@@ -119,8 +119,11 @@ const handlePaymentSuccess = async (req, res) => {
 
 const getAllPayments = async (req, res) => {
   try {
-    const email = req?.query?.email;
+    if (req?.decoded?.email !== req.query.email) {
+      return res.status(403).send({ error: "Forbidden access" });
+    }
 
+    const email = req?.query?.email;
     const payments = await getPaymentsByCustomerEmail(email);
 
     res.send({ success: true, payments });

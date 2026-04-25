@@ -8,6 +8,10 @@ const {
 
 const getParcels = async (req, res) => {
   try {
+    if (req?.decoded?.email !== req.query.email) {
+      return res.status(403).send({ error: "Forbidden access" });
+    }
+
     const { email } = req.query;
     const result = await findAllParcels(email);
     res.send(result);
