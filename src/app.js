@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const parcelRoutes = require("./routes/parcel.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const userRoutes = require("./routes/user.route");
+const verifyFirebaseToken = require("./middlewares/verifyFirebaseToken");
 
 const app = express();
 
@@ -14,5 +16,6 @@ app.get("/", (req, res) => {
 
 app.use("/parcels", parcelRoutes);
 app.use("/", paymentRoutes);
+app.use("/user", verifyFirebaseToken, userRoutes);
 
 module.exports = app;

@@ -40,12 +40,11 @@ const configureDnsForAtlasSrv = () => {
 let client;
 
 let dbConnected = false;
-let parcelsCollection;
-let paymentCollection;
+let parcelsCollection, paymentCollection, userCollection;
 let initPromise = null;
 
 const initCollections = async () => {
-  if (dbConnected && parcelsCollection && paymentCollection) {
+  if (dbConnected && parcelsCollection && paymentCollection && userCollection) {
     return;
   }
 
@@ -83,6 +82,7 @@ const initCollections = async () => {
     const db = client.db("zap_shift_db");
     parcelsCollection = db.collection("parcels");
     paymentCollection = db.collection("payments");
+    userCollection = db.collection("users");
     dbConnected = true;
   })();
 
@@ -92,6 +92,7 @@ const initCollections = async () => {
     dbConnected = false;
     parcelsCollection = undefined;
     paymentCollection = undefined;
+    userCollection = undefined;
     throw error;
   } finally {
     initPromise = null;
@@ -110,7 +111,14 @@ const getPaymentCollection = async () => {
   return paymentCollection;
 };
 
+const getUserCollection = async () => {
+  await initCollections();
+
+  return userCollection;
+};
+
 module.exports = {
   getParcelsCollection,
   getPaymentCollection,
+  getUserCollection,
 };
