@@ -16,6 +16,6 @@ app.get("/", (req, res) => {
 
 app.use("/parcels", parcelRoutes);
 app.use("/", paymentRoutes);
-app.use("/user", verifyFirebaseToken, userRoutes);
+app.use("/user", userRoutes);
 
 module.exports = app;
