@@ -40,11 +40,17 @@ const configureDnsForAtlasSrv = () => {
 let client;
 
 let dbConnected = false;
-let parcelsCollection, paymentCollection, userCollection;
+let parcelsCollection, paymentCollection, userCollection, riderCollection;
 let initPromise = null;
 
 const initCollections = async () => {
-  if (dbConnected && parcelsCollection && paymentCollection && userCollection) {
+  if (
+    dbConnected &&
+    parcelsCollection &&
+    paymentCollection &&
+    userCollection &&
+    riderCollection
+  ) {
     return;
   }
 
@@ -83,6 +89,7 @@ const initCollections = async () => {
     parcelsCollection = db.collection("parcels");
     paymentCollection = db.collection("payments");
     userCollection = db.collection("users");
+    riderCollection = db.collection("riders");
     dbConnected = true;
   })();
 
@@ -93,6 +100,7 @@ const initCollections = async () => {
     parcelsCollection = undefined;
     paymentCollection = undefined;
     userCollection = undefined;
+    riderCollection = undefined;
     throw error;
   } finally {
     initPromise = null;
@@ -117,8 +125,14 @@ const getUserCollection = async () => {
   return userCollection;
 };
 
+const getRiderCollection = async () => {
+  await initCollections();
+  return riderCollection;
+};
+
 module.exports = {
   getParcelsCollection,
   getPaymentCollection,
   getUserCollection,
+  getRiderCollection,
 };
