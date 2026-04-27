@@ -5,6 +5,7 @@ const {
   findAllRiders,
   setNewRiderStatus,
 } = require("../models/rider.model");
+const { findUserByEmail, setUserRole } = require("../models/user.model");
 
 const getARider = async (req, res) => {
   const { _id } = req.params;
@@ -70,6 +71,15 @@ const updateRiderStatus = async (req, res) => {
 
   try {
     const result = await setNewRiderStatus(_id, status);
+
+    if (result.modifiedCount > 0) {
+      const riderInfo = await findARider(_id);
+      const user = await findUserByEmail(riderInfo.email);
+      if (user) {
+        await setUserRole(user.email, status === "Approved" ? "rider" : "user");
+      }
+    }
+
     res.send({
       success: true,
       message: "Rider status updated successfully",
