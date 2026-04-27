@@ -20,8 +20,14 @@ const findAllRiders = async () => {
   return collection.find({}).toArray();
 };
 
+const setNewRiderStatus = async (id, status) => {
+  const collection = await getRiderCollection();
+  return collection.updateOne({ _id: new ObjectId(id) }, { $set: { status } });
+};
+
 module.exports = {
   createANewRider,
   findARider,
   findAllRiders,
+  setNewRiderStatus,
 };

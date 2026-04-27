@@ -3,6 +3,7 @@ const {
   createANewRider,
   findARider,
   findAllRiders,
+  setNewRiderStatus,
 } = require("../models/rider.model");
 
 const getARider = async (req, res) => {
@@ -54,8 +55,36 @@ const createARider = async (req, res) => {
   }
 };
 
+const updateRiderStatus = async (req, res) => {
+  const { _id } = req.params;
+  const { status } = req.body;
+  if (!ObjectId.isValid(_id)) {
+    return res
+      .status(400)
+      .send({ success: false, message: "Invalid rider id" });
+  }
+
+  if (!["Pending", "Approved", "Rejected"].includes(status)) {
+    return res.status(400).send({ success: false, message: "Invalid status" });
+  }
+
+  try {
+    const result = await setNewRiderStatus(_id, status);
+    res.send({
+      success: true,
+      message: "Rider status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ success: false, message: "Error updating rider status" });
+  }
+};
+
 module.exports = {
   createARider,
   getARider,
   getAllRiders,
+  updateRiderStatus,
 };
