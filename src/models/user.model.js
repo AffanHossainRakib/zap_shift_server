@@ -22,8 +22,14 @@ const setUserRole = async (email, role) => {
   return collection.updateOne({ email }, { $set: { role } });
 };
 
+const findAllUsers = async () => {
+  const collection = await getUserCollection();
+  return collection.find({}).toArray();
+};
+
 module.exports = {
   createNewUser,
   findUserByEmail,
   setUserRole,
+  findAllUsers,
 };

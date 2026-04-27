@@ -1,4 +1,8 @@
-const { createNewUser, findUserByEmail } = require("../models/user.model");
+const {
+  createNewUser,
+  findUserByEmail,
+  findAllUsers,
+} = require("../models/user.model");
 
 const createUser = async (req, res) => {
   try {
@@ -24,10 +28,12 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const email = req.body.email;
+    const email = req.body?.email;
     if (!email) {
-      return res.status(400).send({ error: "Email is required" });
+      const users = await findAllUsers();
+      return res.status(200).send({ users });
     }
+
     const user = await findUserByEmail(email);
     if (!user) {
       return res.status(404).send({ error: "User not found" });
