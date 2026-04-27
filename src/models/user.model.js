@@ -27,9 +27,15 @@ const findAllUsers = async () => {
   return collection.find({}).toArray();
 };
 
+const setUserRolebyId = async (id, role) => {
+  const collection = await getUserCollection();
+  return collection.updateOne({ _id: new ObjectId(id) }, { $set: { role } });
+};
+
 module.exports = {
   createNewUser,
   findUserByEmail,
   setUserRole,
   findAllUsers,
+  setUserRolebyId,
 };

@@ -1,7 +1,9 @@
+const { ObjectId } = require("mongodb");
 const {
   createNewUser,
   findUserByEmail,
   findAllUsers,
+  setUserRolebyId,
 } = require("../models/user.model");
 
 const createUser = async (req, res) => {
@@ -45,7 +47,39 @@ const getUser = async (req, res) => {
   }
 };
 
+const updateUserRole = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { role } = req.body;
+
+    if (!id || !role) {
+      return res.status(400).send({ error: "User ID and role are required" });
+    }
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ error: "Invalid user ID" });
+    }
+
+    if (!["user", "admin", "rider"].includes(role)) {
+      return res.status(400).send({ error: "Invalid role value" });
+    }
+
+    const result = await setUserRolebyId(id, role);
+    if (result.modifiedCount === 0) {
+      return res
+        .status(404)
+        .send({ error: "User not found or role unchanged" });
+    }
+    res.status(200).send({ message: "User role updated successfully" });
+  } catch (error) {
+    console.error(req.body);
+    console.error("Error updating user role:", error);
+    res.status(500).send({ error: "Failed to update user role" });
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
+  updateUserRole,
 };
